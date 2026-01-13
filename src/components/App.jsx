@@ -979,6 +979,79 @@ const App = () => {
         </section>
       </ScrollAnimatedSection>
 
+      <ScrollAnimatedSection delay={0.25}>
+        <section id="policies" className="py-28 bg-gradient-to-b from-stone-50 to-white relative overflow-hidden">
+          <div className="container mx-auto px-6 max-w-4xl relative">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center space-x-3 mb-6">
+                <div className="w-16 h-px bg-amber-400"></div>
+                <span className="text-xs text-amber-700 tracking-widest">IMPORTANT</span>
+                <div className="w-16 h-px bg-amber-400"></div>
+              </div>
+              <h2 className="text-5xl font-serif text-stone-900 tracking-tight">Policies</h2>
+            </div>
+            <motion.div 
+              variants={staggerContainer}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              <motion.div 
+                variants={fadeInUp}
+                className="bg-white p-8 shadow-lg border-l-4 border-amber-400"
+              >
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-2xl">⏰</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-serif text-stone-900 mb-2 tracking-wide">Appointment Time</h3>
+                    <p className="text-stone-700 leading-relaxed">
+                      Appointment time must be respected. If late by 20 minutes or more, a fee of <span className="font-semibold text-amber-800">R20</span> will be charged.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                variants={fadeInUp}
+                className="bg-white p-8 shadow-lg border-l-4 border-amber-400"
+              >
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-2xl">🏠</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-serif text-stone-900 mb-2 tracking-wide">House Calls</h3>
+                    <p className="text-stone-700 leading-relaxed">
+                      House calls are available with an additional charge of <span className="font-semibold text-amber-800">R50 extra</span>.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                variants={fadeInUp}
+                className="bg-white p-8 shadow-lg border-l-4 border-amber-400"
+              >
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-2xl">💧</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-serif text-stone-900 mb-2 tracking-wide">Hair Washing</h3>
+                    <p className="text-stone-700 leading-relaxed">
+                      If your hair requires washing before styling, please arrive <span className="font-semibold text-amber-800">20 minutes earlier</span> than your scheduled appointment.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+      </ScrollAnimatedSection>
+
       <ScrollAnimatedSection delay={0.3}>
         <section id="contact" className="py-24 bg-gradient-to-b from-stone-50 to-white">
           <div className="container mx-auto px-6 max-w-3xl">
