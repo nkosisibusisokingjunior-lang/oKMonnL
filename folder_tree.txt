@@ -1,0 +1,28 @@
+laureta-scents/
+├─ public/
+│  ├─ images/
+│  │  └─ products/
+│  │     ├─ car-diffusers/
+│  │     │  └─ dif1.jpg
+│  │     └─ home-diffusers/
+│  │        └─ dif1.jpg
+│  └─ index.html
+├─ src/
+│  ├─ assets/
+│  ├─ components/
+│  │  └─ App.jsx
+│  ├─ data/
+│  │  ├─ products.js
+│  │  └─ reviews.js
+│  ├─ utils/
+│  │  └─ helpers.js
+│  ├─ index.css
+│  └─ main.jsx
+├─ README.md
+├─ collect one.py
+├─ index.html
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.js
+├─ tailwind.config.js
+└─ vite.config.js
