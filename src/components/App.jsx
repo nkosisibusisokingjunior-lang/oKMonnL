@@ -1,6 +1,195 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, Menu, X, Phone, Mail, MapPin, Plus, Minus, Check } from 'lucide-react';
+import { ShoppingCart, Menu, X, Phone, Mail, MapPin, Plus, Minus, Check, ChevronUp, AlertCircle, Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence, useInView, useAnimation } from 'framer-motion';
+
+// DatePicker Component - Scrollable Menu
+const DatePicker = ({ selectedDate, onDateSelect }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Generate next 60 days
+  const generateDates = () => {
+    const dates = [];
+    for (let i = 0; i < 60; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      dates.push(date);
+    }
+    return dates;
+  };
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDateDisplay = (date) => {
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    const dayName = dayNames[date.getDay()];
+    const monthName = monthNames[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    
+    const isToday = formatDate(date) === formatDate(today);
+    
+    return {
+      full: `${dayName}, ${monthName} ${day}, ${year}`,
+      short: `${dayName}, ${monthName} ${day}`,
+      isToday
+    };
+  };
+
+  const dates = generateDates();
+  const selectedDateObj = selectedDate ? dates.find(d => formatDate(d) === selectedDate) : null;
+  const displayText = selectedDateObj 
+    ? formatDateDisplay(selectedDateObj).full 
+    : 'Select a date...';
+
+  return (
+    <div className="relative w-full">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full p-4 border-2 border-stone-200 hover:border-amber-400 focus:border-amber-400 focus:outline-none transition-colors text-left flex items-center justify-between bg-white"
+      >
+        <span className={selectedDate ? 'text-stone-900' : 'text-stone-400'}>
+          {displayText}
+        </span>
+        <ChevronRight 
+          size={20} 
+          className={`text-stone-400 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute z-10 w-full mt-2 bg-white border-2 border-stone-200 shadow-xl max-h-64 overflow-y-auto"
+          >
+            {dates.map((date) => {
+              const formatted = formatDate(date);
+              const display = formatDateDisplay(date);
+              const isSelected = selectedDate === formatted;
+              
+              return (
+                <motion.button
+                  key={formatted}
+                  whileHover={{ backgroundColor: '#fef3c7' }}
+                  onClick={() => {
+                    onDateSelect(formatted);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full p-3 text-left transition-colors border-b border-stone-100 ${
+                    isSelected 
+                      ? 'bg-amber-100 text-amber-900 font-semibold' 
+                      : 'text-stone-700 hover:bg-amber-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{display.short}</span>
+                    {display.isToday && (
+                      <span className="text-xs bg-amber-500 text-white px-2 py-1 rounded font-medium">
+                        Today
+                      </span>
+                    )}
+                  </div>
+                </motion.button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// TimePicker Component - Scrollable Menu
+const TimePicker = ({ selectedTime, onTimeSelect }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Generate time slots (30-minute intervals from 7 AM to 8 PM)
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let hour = 7; hour <= 20; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const hourStr = String(hour).padStart(2, '0');
+        const minuteStr = String(minute).padStart(2, '0');
+        slots.push(`${hourStr}:${minuteStr}`);
+      }
+    }
+    return slots;
+  };
+
+  const formatTimeDisplay = (time) => {
+    const [hour, minute] = time.split(':');
+    const hourNum = parseInt(hour);
+    const period = hourNum >= 12 ? 'PM' : 'AM';
+    const displayHour = hourNum > 12 ? hourNum - 12 : hourNum === 0 ? 12 : hourNum;
+    return `${displayHour}:${minute} ${period}`;
+  };
+
+  const timeSlots = generateTimeSlots();
+  const displayText = selectedTime 
+    ? formatTimeDisplay(selectedTime) 
+    : 'Select a time...';
+
+  return (
+    <div className="relative w-full">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full p-4 border-2 border-stone-200 hover:border-amber-400 focus:border-amber-400 focus:outline-none transition-colors text-left flex items-center justify-between bg-white"
+      >
+        <span className={selectedTime ? 'text-stone-900' : 'text-stone-400'}>
+          {displayText}
+        </span>
+        <ChevronRight 
+          size={20} 
+          className={`text-stone-400 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute z-10 w-full mt-2 bg-white border-2 border-stone-200 shadow-xl max-h-64 overflow-y-auto"
+          >
+            {timeSlots.map((time) => {
+              const isSelected = selectedTime === time;
+              
+              return (
+                <motion.button
+                  key={time}
+                  whileHover={{ backgroundColor: '#fef3c7' }}
+                  onClick={() => {
+                    onTimeSelect(time);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full p-3 text-left transition-colors border-b border-stone-100 ${
+                    isSelected 
+                      ? 'bg-amber-100 text-amber-900 font-semibold' 
+                      : 'text-stone-700 hover:bg-amber-50'
+                  }`}
+                >
+                  {formatTimeDisplay(time)}
+                </motion.button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 const PRODUCTS = [
   {
@@ -34,9 +223,10 @@ const PRODUCTS = [
     ],
     description: "Fulani braids with clean parts and beautiful detailing.",
     scents: ["Small"],
-    sizes: ["Short/Medium", "Long"],
+    sizes: ["Short","Medium","Long"],
     priceMatrix: {
-      Small: { "Short/Medium": 350, Long: 400 }
+      Small: { "Short": 350, "Medium": 350 , "Long": 400 }
+      
     },
     price: 350
   },
@@ -54,10 +244,10 @@ const PRODUCTS = [
     ],
     description: "Straight-back or up-do braids: clean, protective, and stylish.",
     scents: ["Small", "Medium"],
-    sizes: ["Short/Medium", "Long"],
+    sizes: ["Short", "Medium","Long"],
     priceMatrix: {
-      Small: { "Short/Medium": 200, Long: 250 },
-      Medium: { "Short/Medium": 150, Long: 200 }
+      Small: { "Short": 200, "Medium": 200 ,Long: 250 },
+      Medium: { "Short": 150, "Medium": 150, Long: 200 }
     },
     price: 150
   },
@@ -198,7 +388,8 @@ const generateWhatsAppMessage = (cart, total, customerInfo) => {
     message += `Email: ${customerInfo.email}\n`;
   }
   
-  message += `Preferred date/time: ${customerInfo.preferredDateTime}\n`;
+  message += `Preferred date: ${customerInfo.preferredDate}\n`;
+  message += `Preferred time: ${customerInfo.preferredTime}\n`;
   if (customerInfo.notes?.trim()) {
     message += `Notes: ${customerInfo.notes}\n`;
   }
@@ -440,12 +631,30 @@ const App = () => {
     contactMethod: 'whatsapp',
     phone: '',
     email: '',
-    preferredDateTime: '',
+    preferredDate: '',
+    preferredTime: '',
     notes: ''
   });
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [imageLoaded, setImageLoaded] = useState({});
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showStickyBooking, setShowStickyBooking] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 500);
+      setShowStickyBooking(window.scrollY > 800);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleImageLoad = (imageId) => {
     setImageLoaded(prev => ({ ...prev, [imageId]: true }));
@@ -541,7 +750,7 @@ const App = () => {
       alert('Please enter your email address');
       return false;
     }
-    if (!customerInfo.preferredDateTime.trim()) {
+    if (!customerInfo.preferredDate.trim() || !customerInfo.preferredTime.trim()) {
       alert('Please enter your preferred date/time');
       return false;
     }
@@ -570,7 +779,8 @@ const App = () => {
       contactMethod: 'whatsapp',
       phone: '',
       email: '',
-      preferredDateTime: '',
+      preferredDate: '',
+      preferredTime: '',
       notes: ''
     });
     window.open(`https://wa.me/27795430029?text=${encodedMessage}`, '_blank');
@@ -584,6 +794,76 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-50">
+      {/* Alert Banner */}
+      <AnimatePresence>
+        {showBanner && (
+          <motion.div 
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            className="bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white py-3 px-6 relative z-[60]"
+          >
+            <div className="container mx-auto flex items-center justify-between">
+              <div className="flex items-center space-x-3 flex-1">
+                <AlertCircle size={20} className="flex-shrink-0" />
+                <p className="text-sm md:text-base font-medium tracking-wide">
+                  <span className="hidden md:inline">⚠️ Important: </span>
+                  Late arrivals (20+ min) incur R20 fee • House calls +R50 • Wash hair 20min early
+                </p>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowBanner(false)}
+                className="ml-4 text-white hover:text-amber-100 transition-colors"
+              >
+                <X size={20} />
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Sticky Book Now Button */}
+      <AnimatePresence>
+        {showStickyBooking && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsCartOpen(true)}
+            className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-amber-600 to-amber-700 text-white px-6 py-4 rounded-full shadow-2xl hover:shadow-amber-500/50 transition-all flex items-center space-x-2 font-semibold tracking-wider"
+          >
+            <ShoppingCart size={20} />
+            <span>BOOK NOW</span>
+            {cart.length > 0 && (
+              <span className="bg-white text-amber-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                {cart.length}
+              </span>
+            )}
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Scroll to Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1.1, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={scrollToTop}
+            className="fixed bottom-6 left-6 z-50 bg-stone-900 text-white p-4 rounded-full shadow-2xl hover:bg-stone-800 transition-all"
+          >
+            <ChevronUp size={24} strokeWidth={2.5} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showSuccessAnimation && (
           <motion.div
@@ -649,6 +929,13 @@ const App = () => {
                 className="text-stone-700 hover:text-amber-700 transition-colors tracking-wide text-sm relative group"
               >
                 About
+                <span className="absolute bottom-0 left-0 w-0 h-px bg-amber-700 group-hover:w-full transition-all duration-300" />
+              </a>
+              <a 
+                href="#policies" 
+                className="text-stone-700 hover:text-amber-700 transition-colors tracking-wide text-sm relative group"
+              >
+                Policies
                 <span className="absolute bottom-0 left-0 w-0 h-px bg-amber-700 group-hover:w-full transition-all duration-300" />
               </a>
               <a 
@@ -718,6 +1005,13 @@ const App = () => {
                     className="text-stone-700 hover:text-amber-700 tracking-wide text-sm text-left py-2"
                   >
                     About
+                  </a>
+                  <a 
+                    href="#policies" 
+                    onClick={handleMenuClick}
+                    className="text-stone-700 hover:text-amber-700 tracking-wide text-sm text-left py-2"
+                  >
+                    Policies
                   </a>
                   <a 
                     href="#contact" 
@@ -856,7 +1150,7 @@ const App = () => {
                   </div>
                 </div>
                 <div className="text-center space-y-4">
-                  <h3 className="text-2xl font-serif text-stone-900 tracking-wide">{product.name}</h3>
+                  <h3 className="text-2xl font-serif text-stone-900 tracking-wide break-words px-2">{product.name}</h3>
                   <p className="text-stone-600 leading-relaxed max-w-xs mx-auto">{product.description}</p>
                   <div className="w-16 h-px bg-amber-300 mx-auto my-4"></div>
                   <PriceDisplay price={product.price} />
@@ -935,7 +1229,7 @@ const App = () => {
                   <div className="absolute inset-0 border-4 border-white opacity-0 group-hover:opacity-100 transition-opacity m-3 pointer-events-none"></div>
                 </div>
                 <div className="p-6 text-center">
-                  <h3 className="font-serif text-lg text-stone-900 mb-2 tracking-wide">{product.name}</h3>
+                  <h3 className="font-serif text-lg text-stone-900 mb-2 tracking-wide break-words px-2">{product.name}</h3>
                   <PriceDisplay price={product.price} className="px-3 py-2 text-lg" />
                 </div>
               </motion.div>
@@ -999,53 +1293,101 @@ const App = () => {
             >
               <motion.div 
                 variants={fadeInUp}
-                className="bg-white p-8 shadow-lg border-l-4 border-amber-400"
+                whileHover={{ 
+                  y: -4,
+                  scale: 1.02,
+                  transition: { duration: 0.3 }
+                }}
+                className="bg-white p-8 shadow-lg hover:shadow-2xl border-l-4 border-amber-400 relative overflow-hidden group cursor-pointer transition-all duration-300"
               >
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-amber-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">⏰</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-serif text-stone-900 mb-2 tracking-wide">Appointment Time</h3>
-                    <p className="text-stone-700 leading-relaxed">
-                      Appointment time must be respected. If late by 20 minutes or more, a fee of <span className="font-semibold text-amber-800">R20</span> will be charged.
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-r from-amber-50/0 via-amber-50/50 to-amber-50/0"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.6 }}
+                />
+                <div className="flex items-start space-x-4 relative z-10">
+                  <motion.div 
+                    className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg transition-shadow duration-300"
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <span className="text-3xl">⏰</span>
+                  </motion.div>
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-serif text-stone-900 mb-3 tracking-wide group-hover:text-amber-800 transition-colors">Appointment Time</h3>
+                    <p className="text-stone-700 leading-relaxed text-base">
+                      Appointment time must be respected. If late by 20 minutes or more, a fee of <span className="font-bold text-amber-900 bg-amber-50 px-2 py-1 rounded">R20</span> will be charged.
                     </p>
                   </div>
                 </div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100/20 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
               </motion.div>
 
               <motion.div 
                 variants={fadeInUp}
-                className="bg-white p-8 shadow-lg border-l-4 border-amber-400"
+                whileHover={{ 
+                  y: -4,
+                  scale: 1.02,
+                  transition: { duration: 0.3 }
+                }}
+                className="bg-white p-8 shadow-lg hover:shadow-2xl border-l-4 border-amber-400 relative overflow-hidden group cursor-pointer transition-all duration-300"
               >
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-amber-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">🏠</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-serif text-stone-900 mb-2 tracking-wide">House Calls</h3>
-                    <p className="text-stone-700 leading-relaxed">
-                      House calls are available with an additional charge of <span className="font-semibold text-amber-800">R50 extra</span>.
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-r from-amber-50/0 via-amber-50/50 to-amber-50/0"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.6 }}
+                />
+                <div className="flex items-start space-x-4 relative z-10">
+                  <motion.div 
+                    className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg transition-shadow duration-300"
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <span className="text-3xl">🏠</span>
+                  </motion.div>
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-serif text-stone-900 mb-3 tracking-wide group-hover:text-amber-800 transition-colors">House Calls</h3>
+                    <p className="text-stone-700 leading-relaxed text-base">
+                      House calls are available with an additional charge of <span className="font-bold text-amber-900 bg-amber-50 px-2 py-1 rounded">R50 extra</span>.
                     </p>
                   </div>
                 </div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100/20 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
               </motion.div>
 
               <motion.div 
                 variants={fadeInUp}
-                className="bg-white p-8 shadow-lg border-l-4 border-amber-400"
+                whileHover={{ 
+                  y: -4,
+                  scale: 1.02,
+                  transition: { duration: 0.3 }
+                }}
+                className="bg-white p-8 shadow-lg hover:shadow-2xl border-l-4 border-amber-400 relative overflow-hidden group cursor-pointer transition-all duration-300"
               >
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-amber-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">💧</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-serif text-stone-900 mb-2 tracking-wide">Hair Washing</h3>
-                    <p className="text-stone-700 leading-relaxed">
-                      If your hair requires washing before styling, please arrive <span className="font-semibold text-amber-800">20 minutes earlier</span> than your scheduled appointment.
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-r from-amber-50/0 via-amber-50/50 to-amber-50/0"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.6 }}
+                />
+                <div className="flex items-start space-x-4 relative z-10">
+                  <motion.div 
+                    className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center flex-shrink-0 shadow-md group-hover:shadow-lg transition-shadow duration-300"
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <span className="text-3xl">💧</span>
+                  </motion.div>
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-serif text-stone-900 mb-3 tracking-wide group-hover:text-amber-800 transition-colors">Hair Washing</h3>
+                    <p className="text-stone-700 leading-relaxed text-base">
+                      If your hair requires washing before styling, please arrive <span className="font-bold text-amber-900 bg-amber-50 px-2 py-1 rounded">20 minutes earlier</span> than your scheduled appointment.
                     </p>
                   </div>
                 </div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100/20 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
               </motion.div>
             </motion.div>
           </div>
@@ -1172,13 +1514,13 @@ const App = () => {
                           onClick={() => {
                             setSelectedSize(size);
                           }}
-                          className={`p-4 border-2 transition-all tracking-wide ${
+                          className={`p-4 border-2 transition-all tracking-wide break-words text-center min-h-[4rem] flex items-center justify-center ${
                             selectedSize === size 
                               ? 'border-amber-600 bg-gradient-to-br from-amber-50 to-amber-100 text-stone-900 shadow-md' 
                               : 'border-stone-200 hover:border-amber-300 hover:shadow-sm'
                           }`}
                         >
-                          {size}
+                          <span className="break-words">{size}</span>
                         </motion.button>
                       ))}
                     </div>
@@ -1424,15 +1766,32 @@ const App = () => {
                       </div>
                     )}
                     
-                    <div>
+                    <div className="space-y-3">
                       <label className="block text-sm tracking-widest text-stone-900 mb-3 font-medium">PREFERRED DATE / TIME *</label>
-                      <input
-                        type="text"
-                        value={customerInfo.preferredDateTime}
-                        onChange={(e) => handleCustomerInfoChange('preferredDateTime', e.target.value)}
-                        className="w-full p-4 border-2 border-stone-200 focus:border-amber-400 focus:outline-none transition-colors"
-                        placeholder="e.g. Sat 10am or 2026-01-15 14:00"
-                      />
+                      
+                      {/* Date Picker */}
+                      <div>
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Calendar size={16} className="text-amber-600" />
+                          <span className="text-xs font-medium text-stone-600 tracking-wide">DATE</span>
+                        </div>
+                        <DatePicker
+                          selectedDate={customerInfo.preferredDate}
+                          onDateSelect={(date) => handleCustomerInfoChange('preferredDate', date)}
+                        />
+                      </div>
+
+                      {/* Time Picker */}
+                      <div>
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Clock size={16} className="text-amber-600" />
+                          <span className="text-xs font-medium text-stone-600 tracking-wide">TIME</span>
+                        </div>
+                        <TimePicker
+                          selectedTime={customerInfo.preferredTime}
+                          onTimeSelect={(time) => handleCustomerInfoChange('preferredTime', time)}
+                        />
+                      </div>
                     </div>
 
                     <div>
